@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	 xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc 
+   		http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+
+
+	<resources mapping="/resources/**" location="/resources/" />
+	
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="20971520" />
+		<beans:property name="maxInMemorySize" value="1048576" />
+	</beans:bean>
+	<context:component-scan base-package="vn.com.vuong" />
+
+	<!-- 
+		cấu hình nhiệm vụ để lập lịch  
+		- định nghĩa 1 tast mới với ref tham chiếu tới bean trong context mà hàm của nó sẽ được execute
+		- initial-delay: Dừng thời gian trước khi method thực thi lần đầu
+		- fixed-rate: chỉ định số thời gian dừng giữa mỗi lần phương thức start
+		- fixed-delay: Dừng 5s sau mỗi lần thực thi
+		- cron: cung cấp các điều kiện phức tạp
+	-->
+	<task:scheduled-tasks scheduler="myScheduler">
+		<task:scheduled ref="commonMessageBean" method="broadcastNotification" fixed-delay="5000" initial-delay="1000" />
+		<task:scheduled ref="commonMessageBean" method="receivedNotification" fixed-rate="5000" />
+    	<task:scheduled ref="commonMessageBean" method="showResult" cron="*/5 * * * * MON-FRI"/>
+	</task:scheduled-tasks>
+
+	<!-- cấu hình l scheduler lập lịch trình 1 nhiệm vũ sẽ được xảy ra trong tương lai  -->
+	<task:scheduler id="myScheduler" pool-size="10" />
+	
+	
+
+</beans:beans>
